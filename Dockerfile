@@ -13,7 +13,6 @@ RUN echo "deb http://www.deb-multimedia.org jessie main non-free"  >> /etc/apt/s
     && apt-get install -y --force-yes --no-install-recommends ffmpeg=10:2.6.9-dmo1
 
 RUN mkdir -p /code/doc2audiobook
-RUN mkdir /data
 
 COPY requirements.txt /code/doc2audiobook
 RUN pip install -r /code/doc2audiobook/requirements.txt
@@ -21,8 +20,9 @@ RUN pip install -r /code/doc2audiobook/requirements.txt
 RUN pip install --upgrade chardet
 
 COPY . /code/doc2audiobook
-COPY bgnet_A4.pdf /data/
 
-ENV GOOGLE_APPLICATION_CREDENTIALS /code/doc2audiobook/client_secret.json
+ENV GOOGLE_APPLICATION_CREDENTIALS /.secrets/client_secret.json
+
+RUN mkdir /data /.secrets /log
 
 ENTRYPOINT ["python", "/code/doc2audiobook/doc2audiobook.py"]
