@@ -1,8 +1,13 @@
 # doc2audiobook.py
 
 Extract text from a document ([textract](https://textract.readthedocs.io)) and convert it into
-a natural sounding synthesised speech ([Cloud Text-To-Speech](https://cloud.google.com/text-to-speech/)).
+a natural sounding synthesised speech ([Cloud Text-To-Speech](https://cloud.google.com/text-to-speech/)), which
+is able to leverage Deepminds Wavenet models.
 
+## Example
+
+[Input](examples/woody.pdf)
+[Output](examples/woody.mp3)
 
 Available source formats (from `textract`)
 
