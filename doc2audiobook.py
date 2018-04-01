@@ -1,3 +1,4 @@
+import argparse
 from pathlib import Path
 
 import textract
@@ -5,8 +6,6 @@ from google.cloud import texttospeech
 
 from lib.logging import get_module_logger
 from lib.tts_utils import list_voices, text_to_mp3, collect_input_files
-
-import argparse
 
 logger = get_module_logger(__name__)
 
@@ -43,9 +42,9 @@ def process_input_files(input_directory_path: Path,
     input_files = collect_input_files(input_directory_path=input_directory_path)
 
     for input_file in input_files:
-        logger.info(f'Processing input file {input_file}')
+        logger.info(f'Processing input file `{input_file}`')
         output_file = output_directory_path / (input_file.stem + '.mp3')
-        logger.info(f'Target output file is: {output_file}')
+        logger.info(f'Target output file is: `{output_file}`')
 
         text_to_translate = textract.process(str(input_file))
 
@@ -53,9 +52,11 @@ def process_input_files(input_directory_path: Path,
             client=client,
             voice=voice,
             audio_config=audio_config,
-            text=text_to_translate,
+            text=text_to_translate[:5000],
             output_file_path=output_file
         )
+
+        logger.info(f'Processing done for input file `{input_file}`')
 
 
 def main():
@@ -67,14 +68,13 @@ def main():
         print(f'Available voices\n{available_voices}\n')
         return
 
-    # use_voice = input('Which voice to use?')
     use_voice = args.voice
     if use_voice not in available_voices:
         exit('Invalid voice! Use -list-voices to see all available options.')
 
     use_language = '-'.join(use_voice.split('-')[0:2])
 
-    logger.info(f'Using voice {use_voice} in language {use_language}')
+    logger.info(f'Using voice `{use_voice}` in language `{use_language}`')
 
     voice = texttospeech.types.VoiceSelectionParams(language_code=use_language, name=use_voice)
     audio_config = texttospeech.types.AudioConfig(audio_encoding=texttospeech.enums.AudioEncoding.MP3)
@@ -83,6 +83,9 @@ def main():
         input_directory_path=Path('/data/input'), output_directory_path=Path('/data/output'),
         client=client, voice=voice, audio_config=audio_config
     )
+
+    logger.info('Done!')
+    logger.info('Failures have been saved next to their respective output files.')
 
 
 if __name__ == '__main__':
