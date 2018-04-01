@@ -16,7 +16,7 @@ def parse_arguments():
 
     :return:
     """
-    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser = argparse.ArgumentParser(description='Synthesise text from various documents into high fidelity speech.')
     parser.add_argument('-list-voices', help='List available voices.', action='store_true')
     parser.add_argument('--voice', type=str, help='Voice to use for synthesis. Use -list-voices to see options.')
 
@@ -52,7 +52,7 @@ def process_input_files(input_directory_path: Path,
             client=client,
             voice=voice,
             audio_config=audio_config,
-            text=text_to_translate[:5000],
+            text=text_to_translate,
             output_file_path=output_file
         )
 

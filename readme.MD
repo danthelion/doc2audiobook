@@ -47,6 +47,8 @@ Host Machine
 ## Build
 
 ```
+$ git clone git@github.com:danthelion/doc2audiobook.git
+$ cd doc2audiobook
 $ docker build -t doc2audiobook .
 ```
 

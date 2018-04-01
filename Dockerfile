@@ -17,12 +17,13 @@ RUN mkdir -p /code/doc2audiobook
 COPY requirements.txt /code/doc2audiobook
 RUN pip install -r /code/doc2audiobook/requirements.txt
 
+# Explicityl upgrade chardet because some conflicts in google libraries relating to the requests package.
 RUN pip install --upgrade chardet
 
 COPY . /code/doc2audiobook
 
 ENV GOOGLE_APPLICATION_CREDENTIALS /.secrets/client_secret.json
 
-RUN mkdir /data /.secrets /log
+RUN mkdir /data /.secrets
 
 ENTRYPOINT ["python", "/code/doc2audiobook/doc2audiobook.py"]
