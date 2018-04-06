@@ -10,7 +10,7 @@ from lib.logging import get_module_logger
 logger = get_module_logger(__name__)
 
 
-def collect_input_files(input_directory_path: Path) -> List(Path):
+def collect_input_files(input_directory_path: Path) -> List[Path]:
     """
     Grab every file inside the input directory.
 
