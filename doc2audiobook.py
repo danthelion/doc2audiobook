@@ -19,11 +19,12 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='Synthesise text from various documents into high fidelity speech.')
     parser.add_argument('-list-voices', help='List available voices.', action='store_true')
     parser.add_argument('--voice', type=str, help='Voice to use for synthesis. Use -list-voices to see options.')
+    parser.add_argument('--input', type=str, help='Specify singular file input, defaults to whole input directory.')
 
     return parser.parse_args()
 
 
-def process_input_files(input_directory_path: Path,
+def process_input_files(input_path: Path,
                         output_directory_path: Path,
                         client: texttospeech.TextToSpeechClient,
                         voice: texttospeech.types.VoiceSelectionParams,
@@ -32,31 +33,44 @@ def process_input_files(input_directory_path: Path,
     """
     Process every file inside `input_directory_path` and save results in `output_directory_path`.
 
-    :param input_directory_path: Full path to the input directory.
+    :param input_path: Full path to the input directory or a singular file (inside the mapped input directory).
     :param output_directory_path: Full path to the output directory.
     :param client: TextToSpeechClient instance.
     :param voice: VoiceSelectionParams instance.
     :param audio_config: AudioConfig instance.
     :return: None
     """
-    input_files = collect_input_files(input_directory_path=input_directory_path)
+    if input_path.is_dir():
+        input_files = collect_input_files(input_directory_path=input_path)
 
-    for input_file in input_files:
-        logger.info(f'Processing input file `{input_file}`')
-        output_file = output_directory_path / (input_file.stem + '.mp3')
-        logger.info(f'Target output file is: `{output_file}`')
+        processed_files = 0
 
-        text_to_translate = textract.process(str(input_file))
+        for input_file in input_files:
+            process_input_file(client=client, voice=voice, audio_config=audio_config, input_file=input_file,
+                               output_directory_path=output_directory_path)
+            processed_files += 1
+        logger.info(f'Files processed from input directory {input_path}: {processed_files}.')
+    else:
+        process_input_file(client=client, voice=voice, audio_config=audio_config, input_file=input_path,
+                           output_directory_path=output_directory_path)
 
-        text_to_mp3(
-            client=client,
-            voice=voice,
-            audio_config=audio_config,
-            text=text_to_translate,
-            output_file_path=output_file
-        )
 
-        logger.info(f'Processing done for input file `{input_file}`')
+def process_input_file(client, voice, audio_config, input_file: Path, output_directory_path):
+    logger.info(f'Processing input file `{input_file}`')
+    output_file = output_directory_path / (input_file.stem + '.mp3')
+    logger.info(f'Target output file is: `{output_file}`')
+
+    text_to_translate = textract.process(str(input_file))
+
+    text_to_mp3(
+        client=client,
+        voice=voice,
+        audio_config=audio_config,
+        text=text_to_translate,
+        output_file_path=output_file
+    )
+
+    logger.info(f'Processing done for input file `{input_file}`')
 
 
 def main():
@@ -79,8 +93,13 @@ def main():
     voice = texttospeech.types.VoiceSelectionParams(language_code=use_language, name=use_voice)
     audio_config = texttospeech.types.AudioConfig(audio_encoding=texttospeech.enums.AudioEncoding.MP3)
 
+    if args.input:
+        input_path = Path('/data/input') / Path(args.input)
+    else:
+        input_path = Path('/data/input')
+
     process_input_files(
-        input_directory_path=Path('/data/input'), output_directory_path=Path('/data/output'),
+        input_path=input_path, output_directory_path=Path('/data/output'),
         client=client, voice=voice, audio_config=audio_config
     )
 
