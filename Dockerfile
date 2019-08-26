@@ -1,24 +1,22 @@
-FROM python:3.6
+FROM python:3.7
 
 MAINTAINER Daniel Palma <danivgy@gmail.com>
 
 RUN apt-get update && apt-get install -y \
-    build-essential python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr \
+    build-essential python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils tesseract-ocr \
     flac lame libmad0 libsox-fmt-mp3 sox libjpeg-dev swig libpulse-dev
 
-RUN echo "deb http://www.deb-multimedia.org jessie main non-free"  >> /etc/apt/sources.list \
-    && echo "deb-src http://www.deb-multimedia.org jessie main non-free" >> /etc/apt/sources.list \
-    && apt-get update \
-    && apt-get install -y --force-yes deb-multimedia-keyring \
-    && apt-get install -y --force-yes --no-install-recommends ffmpeg=10:2.6.9-dmo1
+RUN echo "deb http://www.deb-multimedia.org buster main non-free"  >> /etc/apt/sources.list \
+    && apt-get update -oAcquire::AllowInsecureRepositories=true \
+    && apt-get install -y --allow-downgrades --allow-remove-essential --allow-change-held-packages \
+    --allow-unauthenticated deb-multimedia-keyring \
+    && apt-get install -y --allow-downgrades --allow-remove-essential --allow-change-held-packages \
+    --allow-unauthenticated ffmpeg=10:4.1.4-dmo1+deb10u1
 
 RUN mkdir -p /code/doc2audiobook
 
 COPY requirements.txt /code/doc2audiobook
 RUN pip install -r /code/doc2audiobook/requirements.txt
-
-# Explicityl upgrade chardet because some conflicts in google libraries relating to the requests package.
-RUN pip install --upgrade chardet
 
 COPY . /code/doc2audiobook
 

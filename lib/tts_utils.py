@@ -1,7 +1,7 @@
 import json
 import traceback
 from pathlib import Path
-from typing import List
+from typing import List, Generator
 
 from google.cloud import texttospeech
 
@@ -10,7 +10,7 @@ from lib.logging import get_module_logger
 logger = get_module_logger(__name__)
 
 
-def collect_input_files(input_directory_path: Path) -> List[Path]:
+def collect_input_files(input_directory_path: Path) -> Generator[Path, None, None]:
     """
     Grab every file inside the input directory.
 
@@ -41,7 +41,7 @@ def text_to_mp3(client: texttospeech.TextToSpeechClient,
 
     output_file_log = output_file_path.parent / (output_file_path.stem + '_log.json')
 
-    with open(output_file_path, 'wb') as output_file:
+    with output_file_path.open(mode='wb') as output_file:
         for (i, text_chunk) in enumerate(lines):
             # skip empty lines
             if len(text_chunk) > 0:
